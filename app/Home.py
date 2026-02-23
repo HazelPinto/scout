@@ -1,11 +1,33 @@
 import os
-from dotenv import load_dotenv
 import psycopg2
 import pandas as pd
 import streamlit as st
 
-load_dotenv()
-DB = os.environ["DATABASE_URL"]
+# --- Env loading (local) + Secrets (cloud) ---
+try:
+    from dotenv import load_dotenv  # optional in cloud
+    load_dotenv()
+except Exception:
+    pass
+
+def get_setting(name: str, secret_fallback: bool = True) -> str:
+    """
+    Reads config from environment first; falls back to Streamlit secrets when available.
+    """
+    v = os.getenv(name)
+    if v:
+        return v
+    if secret_fallback:
+        try:
+            return st.secrets[name]
+        except Exception:
+            pass
+    raise RuntimeError(
+        f"Missing required setting: {name}. "
+        f"Set it in .env (local) or Streamlit Secrets (cloud)."
+    )
+
+DB = get_setting("DATABASE_URL")
 
 st.set_page_config(page_title="Scout Console", layout="wide")
 
@@ -40,6 +62,7 @@ def load_companies(q: str = "") -> pd.DataFrame:
 
     return pd.DataFrame(rows, columns=["company_id", "name", "website", "domain", "updated_at"])
 
+
 st.title("Scout Console")
 st.caption("Internal console: companies, sources, evidence-first facts.")
 
@@ -55,14 +78,14 @@ st.subheader("Open company")
 if len(df) == 0:
     st.info("No companies yet. Insert one in Neon or via pipeline.")
 else:
-    default_idx = 0
     selected = st.selectbox(
         "Select a company",
         options=list(range(len(df))),
         format_func=lambda i: f"{df.iloc[i]['name']} — {df.iloc[i]['domain'] or ''}",
-        index=default_idx,
+        index=0,
     )
     company_id = df.iloc[selected]["company_id"]
+
     st.page_link("pages/Company.py", label="Go to Company Detail", icon="➡️", disabled=False)
     st.code(f"Company ID: {company_id}")
     st.caption("Open Company Detail and paste the Company ID there (simple MVP).")
