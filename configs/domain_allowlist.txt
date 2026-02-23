@@ -1,0 +1,21 @@
+# Tier 1: company-controlled
+9fin.com
+
+# Tier 2: reputable tech/business news
+reuters.com
+bloomberg.com
+wsj.com
+ft.com
+theinformation.com
+techcrunch.com
+venturebeat.com
+forbes.com
+
+# Tier 3: startup/company data (a veces paywall)
+crunchbase.com
+pitchbook.com
+
+# Tier 4: general (use with caution)
+prnewswire.com
+businesswire.com
+globenewswire.com
